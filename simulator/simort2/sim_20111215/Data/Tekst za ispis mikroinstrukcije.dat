@@ -1,0 +1,456 @@
+! Citanje instrukcije !
+step00 => br (if /START then step00);
+
+step01 => ldMAR, incPC;
+
+step02 => br (if  hack then step02);
+
+step03 => eMAR, rdCPU,br (if /fcCPU then step03);
+
+step04 => ldIR0;
+
+step05 => br (if /gropr then step07);
+
+step06 => stPRCOD, br stepC0;
+
+step07 => br (if l1 then step50);
+
+step08 => ldMAR, incPC;
+
+step09 => br (if hack then step09);
+
+step0A => eMAR, rdCPU,br (if /fcCPU then step0A);
+
+step0B => ldIR1, ldGPRADR;
+
+step0C => br (if /gradr then step0E);
+
+step0D => stPRADR, br stepC0;
+
+step0E => br (if l2_brnch then step50);
+
+step0F => br (if l2_arlog then step20);
+
+step10 => ldMAR, incPC;
+
+step11 => br (if  hack then step11);
+
+step12 => eMAR, rdCPU, br (if /fcCPU  then step12);
+
+step13 => ldIR2,br (if  l3_jump then step50);
+
+step14 => br (if  l3_arlog then step20);
+
+step15 => ldMAR, incPC;
+
+step16 => br (if  hack then step16);
+
+step17 => eMAR, rdCPU, br (if /fcCPU then step17);
+
+step18 => ldIR3, br step20;
+
+step19 => none;
+
+step1A => none;
+
+step1B => none;
+
+step1C => none;
+
+step1D => none;
+
+step1E => none;
+
+step1F => none;
+! Formiranje adrese i citanje operanda !
+step20 => br (case (regdir, regind, memdir, memind, regindpom, bxpom, bcpom, imm);
+! Registarsko direktno adresiranje !
+step21 => br (if store then step50);
+
+step22 => br (if LDW then step24);
+
+step23 => ldBB, br step50;
+
+step24 => ldBW, br step50;
+! Registarsko indirektno adresiranje !
+step25 => mxMAR0, ldMAR, br (if store then step50);
+
+step26 => br step38;
+! Memorijsko direktno adresiranje !
+step27 => mxMAR1, ldMAR, br (if store then step50);
+
+step28 => br step38;
+! Memorijsko indirektno adresiranje !
+step29 => mxMAR1, ldMAR;
+
+step2A => br (if hack then step2A);
+
+step2B => eMAR, rdCPU,br (if /fcCPU then step2B);
+
+step2C => ldDWH, incMAR;
+
+step2D => br (if hack then step2D);
+
+step2E => eMAR, rdCPU,br (if /fcCPU then step2E);
+
+step2F => ldDWL;
+
+step30 => mxMAR1, mxMAR0, ldMAR, br (if store then step50);
+
+step31 => br step38;
+! Registarsko indirektno adresiranje sa pomerajem !
+step32 => mxADDA0, mxADDB0, mxMAR2, ldMAR, br (if store then step50);
+
+step33 => br step38;
+! Bazno indeksno adresiranje sa pomerajem !
+step34 => mxADDA0, mxADDB0, ldCW, incGPRAR;
+
+step35 => mxADDA1, mxADDA0, mxADDB1, mxMAR2, ldMAR, br (if store then step50);
+
+step36 => br step38;
+! PC relativno adresiranje !
+step37 => mxADDA1, mxADDB0, mxMAR2, ldMAR, br (if store then step50);
+! Citanje operanda !
+step38 => br (if hack then step38);
+
+step39 => eMAR, rdCPU,br (if /fcCPU  then step39);
+
+step3A => br (if LDW then step3C);
+
+step3B => mxBB0, ldBB, br step50;
+
+step3C => ldDWH, incMAR;
+
+step3D => br (if  hack then step3D);
+
+step3E => eMAR, rdCPU,br (if /fcCPU  then step3E);
+
+step3F => ldDWL;
+
+step40 => mxBW0, ldBW, br step50;
+! Neposredno adresiranje !
+step41 => br (if LDW then step43);
+
+step42 => mxBB1, ldBB, br step50;
+
+step43 => mxBW1, ldBW, br step50;
+
+step44 => none;
+
+step45 => none;
+
+step46 => none;
+
+step47 => none;
+
+step48 => none;
+
+step49 => none;
+
+step4A => none;
+
+step4B => none;
+
+step4C => none;
+
+step4D => none;
+
+step4E => none;
+
+step4F => none;
+! Izvršavanje operacije !
+step50 => br (case (NOP, HALT, INTD,..., JSR, RTI, RTS)
+! NOP !
+step51 => br stepC0;
+! HALT !
+step52 => clSTART,br step00;
+! INTD !
+step53 => clPSWI, br stepC0;
+! INTE !
+step54 => stPSWI, br stepC0;
+! TRPD !
+step55 => clPSWT, br stepC0;
+! TRPE !
+step56 => stPSWT, br stepC0;
+! LDB !
+step57 => mxAB, ldAB;
+
+step58 => ldN, ldZ, ldC, ldV,  br stepC0;
+! LDW !
+step59 => ldAW,br stepC0;
+! STB !
+step5A => br (if dirreg then step5F);
+
+step5B => mxMDR0, ldMDR;
+
+step5C => br (if  hack then step5C);
+
+step5D => eMAR, eMDR, wrCPU,br (if /fcCPU then step5D);
+
+step5E => br stepC0;
+
+step5F => wrGPR, br stepC0;
+! STW !
+step60 => br (if dirreg then step68);
+
+step61 => mxMDR1, ldMDR;
+
+step62 => br (if hack then step62);
+
+step63 => eMAR, eMDR, wrCPU, br (if  /fcCPU then step63);
+
+step64 => mxMDR1, mxMDR0, ldMDR, incMAR;  =>  => 
+
+step65 => br (if  hack then step65);
+
+step66 => eMAR, eMDR, wrCPU, br (if  /fcCPU then step66);
+
+step67 => br stepC0;
+
+step68 => mxGPR, wrGPR, br stepC0;
+! POPB !
+step69 => mxMAR2, mxMAR0, ldMAR, decSP;
+
+step6A  => br (if hack then step6A);
+
+step6B => eMAR, rdCPU, br (if /fcCPU then step6B);
+
+step6C => mxBB0, ldBB;
+
+step6D => mxAB, ldAB;
+
+step6E => ldN, ldZ, ldC, ldV, br stepC0;
+! POPW !
+step6F => mxMAR2, mxMAR0, ldMAR, decSP;
+
+step70 => br (if  hack then step70);
+
+step71 => eMAR, rdCPU, br (if /fcCPU then step71);
+
+step72 => ldDWL;
+
+step73 => mxMAR2, mxMAR0, ldMAR, decSP;
+
+step74 => br (if  hack then step74);
+
+step75 => eMAR, rdCPU,br (if /fcCPU  then step75);
+
+step76 => ldDWH;
+
+step77 => mxBW0, ldBW;
+
+step78 => ldAW,br stepC0;
+! PUSHB !
+step79 => incSP;
+
+step7A => mxMAR2, mxMAR0, ldMAR, mxMDR0, ldMDR;
+
+step7B => br (if  hack then step7B);
+
+step7C => eMAR, eMDR, wrCPU, br (if  /fcCPU then step7C);
+
+step7D => br stepC0;
+! PUSHW !
+step7E => incSP;
+
+step7F => mxMAR2, mxMAR0, ldMAR, mxMDR1, ldMDR;
+
+step80 => br (if  hack then step80);
+
+step81 => eMAR, eMDR, wrCPU, br (if /fcCPU  then step81);
+
+step82 => incSP;
+
+step83 => mxMAR2, mxMAR0, ldMAR, mxMDR1, mxMDR0, ldMDR;
+
+step84 => br (if  hack then step84);
+
+step85 => eMAR, eMDR, wrCPU, br (if /fcCPU  then step85);
+
+step86 => br stepC0;
+! LDIVTP !
+step87 => mxAW1, ldAW,br stepC0;
+! STIVTP !
+step88 => ldIVTP,br stepC0;
+! LDIMR !
+step89 => mxAW1, mxAW0, ldAW,br stepC0;
+! STIMR !
+step8A => ldIMR,br stepC0;
+! LDSP !
+step8B => mxAW0, ldAW,br stepC0;
+! STSP !
+step8C => ldSP, br stepC0;
+! ADD !
+step8D => add, ldAB, ldC, ldV;
+
+step8E => ldN, ldZ,br stepC0;
+! SUB !
+step8F => sub, ldAB, ldC, ldV;
+
+step90 => ldN, ldZ,br stepC0;
+! INC !
+step91 => inc, ldAB, ldC, ldV;
+
+step92 => ldN, ldZ,br stepC0;
+! DEC !
+step93 => dec, ldAB, ldC, ldV;
+
+step94 => ldN, ldZ,br stepC0;
+! AND !
+step95 => and, ldAB;
+
+step96 => ldN, ldZ, ldC, ldV,br stepC0;
+! OR !
+step97 => or, ldAB;
+
+step98 => ldN, ldZ, ldC, ldV,br stepC0;
+! XOR !
+step99 => xor, ldAB;
+
+step9A => ldN, ldZ, ldC, ldV, br stepC0;
+! NOT !
+step9B => not, ldAB;
+
+step9C => ldN, ldZ, ldC, ldV,br stepC0;
+! ASR, LSR, ROR i ROLC !
+step9D => shr, ldC;
+
+step9E => ldN, ldZ, ldV, br stepC0;
+! ASL, LSL, ROL i ROLC !
+step9F => shl, ldC;
+
+stepA0 => ldN, ldZ, ldV,br stepC0;
+! BEQL,…, BLSSEU !
+stepA1 => br (if  /brpom  then stepC0);
+
+stepA2 => mxADDA1, mxADDB1, mxADDB0, mxPC0, ldPC, br stepC0;
+! JMP !
+stepA3 => mxPC1, ldPC, br stepC0;
+! INT !
+stepA4 => stPRINS,br stepC0;
+! JSR !
+stepA5 => incSP;
+
+stepA6 => mxMAR2, mxMAR0, ldMAR, mxMDR2, ldMDR;
+
+stepA7 => br (if  hack then stepA7);
+
+stepA8 => eMAR, eMDR, wrCPU,br (if /fcCPU then stepA8);
+
+stepA9 => incSP;
+
+stepAA => mxMAR2, mxMAR0, ldMAR, mxMDR2, mxMDR0, ldMDR;
+
+stepAB => br (if hack then stepAB);
+
+stepAC => eMAR, eMDR, wrCPU, br (if  /fcCPU then stepAC);
+
+stepAD => mxPC1, ldPC, br stepC0;
+! RTI !
+stepAE => mxMAR2, mxMAR0, ldMAR, decSP;
+
+stepAF => br (if hack then stepAF);
+
+stepB0 => eMAR, rdCPU, br (if  /fcCPU then stepB0);
+
+stepB1 => ldPSWL;
+
+stepB2 => mxMAR2, mxMAR0, ldMAR, decSP;
+
+stepB3 => br (if hack then stepB3);
+
+stepB4 => eMAR, rdCPU, br (if /fcCPU then stepB4);
+
+stepB5 => ldPSWH;
+! RTS !
+stepB6 => mxMAR2, mxMAR0, ldMAR, decSP;
+
+stepB7 => br (if hack then stepB7);
+
+stepB8 => eMAR, rdCPU,br (if  /fcCPU then stepB8);
+
+stepB9 => ldDWL;
+
+stepBA => mxMAR2, mxMAR0, ldMAR, decSP;
+
+stepBB => br (if hack then stepBB);
+
+stepBC => eMAR, rdCPU, br (if /fcCPU then stepBC);
+
+stepBD => ldDWH;
+
+stepBE => ldPC, br stepC0;
+
+stepBF => none;
+! Opsluživanje prekida !
+stepC0 => br (if /prekid then step00);
+! Cuvanje konteksta procesora !
+stepC1 => incSP;
+
+stepC2 => mxMAR2, mxMAR0, ldMAR, mxMDR2, ldMDR;
+
+stepC3 => br (if  hack then stepC3);
+
+stepC4 => eMAR, eMDR, wrCPU, br (if /fcCPU  then stepC4);
+
+stepC5 => incSP;
+
+stepC6 => mxMAR2, mxMAR0, ldMAR, mxMDR2, mxMDR0, ldMDR;
+
+stepC7 => br (if  hack then stepC7);
+
+stepC8 => eMAR, eMDR, wrCPU,br (if  /fcCPU then stepC8);
+
+stepC9 => incSP;
+
+stepCA => mxMAR2, mxMAR0, ldMAR, mxMDR2, mxMDR1, ldMDR;
+
+stepCB => br (if  hack then stepCB);
+
+stepCC => eMAR, eMDR, wrCPU, br (if /fcCPU  then stepCC);
+
+stepCD => incSP;
+
+stepCE => mxMAR2, mxMAR0, ldMAR, mxMDR2, mxMDR1, mxMDR0, ldMDR;
+
+stepCF => br (if  hack then stepCF);
+
+stepD0 => eMAR, eMDR, wrCPU,br (if /fcCPU then stepD0);
+! Utvrdivanje broja ulaza. Provera da li postoji zahtev za prekid zbog izvršavanja instrukcije prekida INT. !
+stepD1 => br (if /PRINS  then stepD3);
+
+stepD2 => ldBR, clPRINS, br stepDC;
+! Provera da li postoji zahtev za prekid zbog greške u kodu operacije. !
+stepD3 => br (if /PRCOD  then stepD5);
+
+stepD4 => mxBR1, ldBR, clPRCOD,br stepDC;
+! Provera da li postoji zahtev za prekid zbog greške u adresiranju. !
+stepD5 => br (if /PRADR  then stepD7);
+
+stepD6 => mxBR1, ldBR, clPRADR, br stepDC;
+! Provera da li postoji spoljašnji nemaskirajuci zahtev za prekid. !
+stepD7 => br (if /PRINM then stepD9);
+
+stepD8 => mxBR1, ldBR, clPRINM, br stepDC;
+! Provera da li postoji spoljašnji maskirajuci zahtev za prekid. !
+stepD9 => br (if /printr then stepDB);
+
+stepDA => mxBR0, ldBR, clINTR, ldL, br stepDC;
+! Prekid posle svake instrukcije !
+stepDB => mxBR1, ldBR;
+! Utvrdivanje adrese prekidne rutine !
+stepDC => mxMAR2, ldMAR;
+
+stepDD => br (if  hack then stepDD);
+
+stepDE => eMAR, rdCPU, br (if /fcCPU  then stepDE);
+
+stepDF => ldDWH, incMAR;
+
+stepE0 => br (if  hack then stepE0);
+
+stepE1 => eMAR, rdCPU, br (if /fcCPU then stepE1);
+
+stepE2 => ldDWL;
+
+stepE3 => ldPC, clPSWI, clPSWT, br step00;
