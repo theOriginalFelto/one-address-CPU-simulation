@@ -1,4 +1,4 @@
-# one-address-CPU-simulation
+# One address CPU simulation
 
 A simulation of a one address CPU made with logisim simulator.
 
